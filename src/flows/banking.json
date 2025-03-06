@@ -1,0 +1,70 @@
+{
+    "appName": "Sample Banking",
+    "version": "1.0.0",
+    "shortCode": "*123#",
+    "screens": {
+      "welcome": {
+        "type": "menu",
+        "text": "Welcome to Sample Banking\n1. Check Balance\n2. Transfer Money\n3. Account Info\n4. Exit",
+        "options": {
+          "1": { "next": "checkBalance" },
+          "2": { "next": "transferMoney" },
+          "3": { "next": "accountInfo" },
+          "4": { "next": "exit" }
+        },
+        "default": { "next": "invalidOption" }
+      },
+      "invalidOption": {
+        "type": "menu",
+        "text": "Invalid option selected. Please try again.\n1. Back to Main Menu",
+        "options": {
+          "1": { "next": "welcome" }
+        },
+        "default": { "next": "welcome" }
+      },
+      "checkBalance": {
+        "type": "notification",
+        "text": "Your current balance is $1,250.00\nThank you for using our service.",
+        "shouldClose": true
+      },
+      "transferMoney": {
+        "type": "input",
+        "text": "Enter recipient phone number:",
+        "validator": "validatePhone",
+        "store": "recipientPhone",
+        "next": "transferAmount"
+      },
+      "transferAmount": {
+        "type": "input",
+        "text": "Enter amount to transfer to {{recipientPhone}}:",
+        "validator": "validateAmount",
+        "store": "transferAmount",
+        "next": "confirmTransfer"
+      },
+      "confirmTransfer": {
+        "type": "menu",
+        "text": "Confirm transfer of ${{transferAmount}} to {{recipientPhone}}?\n1. Confirm\n2. Cancel",
+        "options": {
+          "1": { "next": "transferSuccess" },
+          "2": { "next": "welcome" }
+        }
+      },
+      "transferSuccess": {
+        "type": "notification",
+        "text": "Successfully transferred ${{transferAmount}} to {{recipientPhone}}.\nNew balance: $1,150.00\nThank you for using our service.",
+        "shouldClose": true
+      },
+      "accountInfo": {
+        "type": "menu",
+        "text": "Account Information\nName: John Doe\nAccount No: 123456789\nType: Savings\n\n1. Back to Main Menu",
+        "options": {
+          "1": { "next": "welcome" }
+        }
+      },
+      "exit": {
+        "type": "notification",
+        "text": "Thank you for using Sample Banking. Goodbye!",
+        "shouldClose": true
+      }
+    }
+  }

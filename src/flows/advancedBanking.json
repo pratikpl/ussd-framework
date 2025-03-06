@@ -1,0 +1,214 @@
+{
+    "appName": "Advanced Banking",
+    "version": "1.0.0",
+    "shortCode": "*456#",
+    "screens": {
+      "welcome": {
+        "type": "menu",
+        "text": "Welcome to Advanced Banking\n1. Account Info\n2. Transfers\n3. Bill Payments\n4. Airtime\n5. Exit",
+        "options": {
+          "1": { "next": "accountMenu" },
+          "2": { "next": "transferMenu" },
+          "3": { "next": "billPaymentMenu" },
+          "4": { "next": "airtimeMenu" },
+          "5": { "next": "exit" }
+        },
+        "default": { "next": "invalidOption" }
+      },
+      "invalidOption": {
+        "type": "menu",
+        "text": "Invalid option selected. Please try again.\n1. Back to Main Menu",
+        "options": {
+          "1": { "next": "welcome" }
+        },
+        "default": { "next": "welcome" }
+      },
+      "accountMenu": {
+        "type": "menu",
+        "text": "Account Information\n1. Check Balance\n2. Mini Statement\n3. Account Details\n4. Back",
+        "options": {
+          "1": { "next": "checkBalance" },
+          "2": { "next": "miniStatement" },
+          "3": { "next": "accountDetails" },
+          "4": { "next": "welcome" }
+        },
+        "default": { "next": "invalidOption" }
+      },
+      "checkBalance": {
+        "type": "dynamic",
+        "handler": "getAccountBalance",
+        "next": "accountMenu"
+      },
+      "miniStatement": {
+        "type": "dynamic",
+        "handler": "getTransactions",
+        "next": "accountMenu"
+      },
+      "accountDetails": {
+        "type": "notification",
+        "text": "Account Number: 1234567890\nAccount Type: Savings\nBranch: Main Branch\nKYC Status: Verified\n\nThank you for banking with us!",
+        "shouldClose": true
+      },
+      "transferMenu": {
+        "type": "menu",
+        "text": "Transfer Money\n1. To Saved Beneficiary\n2. To New Beneficiary\n3. Back",
+        "options": {
+          "1": { "next": "selectBeneficiary" },
+          "2": { "next": "newBeneficiary" },
+          "3": { "next": "welcome" }
+        }
+      },
+      "selectBeneficiary": {
+        "type": "dynamic",
+        "handler": "getSavedBeneficiaries",
+        "next": "transferAmount"
+      },
+      "newBeneficiary": {
+        "type": "input",
+        "text": "Enter beneficiary account number:",
+        "validator": "validateAccountNumber",
+        "store": "beneficiaryAccount",
+        "next": "enterBeneficiaryName"
+      },
+      "enterBeneficiaryName": {
+        "type": "input",
+        "text": "Enter beneficiary name:",
+        "store": "beneficiaryName",
+        "next": "transferAmount"
+      },
+      "transferAmount": {
+        "type": "input",
+        "text": "Enter amount to transfer:",
+        "validator": "validateAmount",
+        "store": "transferAmount",
+        "next": "confirmTransfer"
+      },
+      "confirmTransfer": {
+        "type": "menu",
+        "text": "Confirm transfer of ${{transferAmount}} to {{beneficiaryName}}?\n1. Confirm\n2. Cancel",
+        "options": {
+          "1": { "next": "otpVerification" },
+          "2": { "next": "transferMenu" }
+        }
+      },
+      "otpVerification": {
+        "type": "dynamic",
+        "handler": "sendOtp",
+        "next": "enterOtp"
+      },
+      "enterOtp": {
+        "type": "input",
+        "text": "Enter the OTP sent to your registered mobile number:",
+        "validator": "validateOtp",
+        "store": "otpCode",
+        "next": "processTransfer"
+      },
+      "processTransfer": {
+        "type": "dynamic",
+        "handler": "processTransfer",
+        "next": "transferSuccess"
+      },
+      "transferSuccess": {
+        "type": "notification",
+        "text": "Successfully transferred ${{transferAmount}} to {{beneficiaryName}}.\nReference: {{transactionRef}}\nThank you for using our service.",
+        "shouldClose": true
+      },
+      "billPaymentMenu": {
+        "type": "dynamic",
+        "handler": "getBillers",
+        "next": "enterBillAccount"
+      },
+      "enterBillAccount": {
+        "type": "input",
+        "text": "Enter account/reference number for {{selectedBiller}}:",
+        "store": "billAccount",
+        "next": "enterBillAmount"
+      },
+      "enterBillAmount": {
+        "type": "input",
+        "text": "Enter amount to pay for {{selectedBiller}}:",
+        "validator": "validateAmount",
+        "store": "billAmount",
+        "next": "confirmBillPayment"
+      },
+      "confirmBillPayment": {
+        "type": "menu",
+        "text": "Confirm payment of ${{billAmount}} to {{selectedBiller}} for account {{billAccount}}?\n1. Confirm\n2. Cancel",
+        "options": {
+          "1": { "next": "processBillPayment" },
+          "2": { "next": "billPaymentMenu" }
+        }
+      },
+      "processBillPayment": {
+        "type": "dynamic",
+        "handler": "processBillPayment",
+        "next": "billPaymentSuccess"
+      },
+      "billPaymentSuccess": {
+        "type": "notification",
+        "text": "Successfully paid ${{billAmount}} to {{selectedBiller}}.\nReference: {{paymentRef}}\nThank you for using our service.",
+        "shouldClose": true
+      },
+      "airtimeMenu": {
+        "type": "menu",
+        "text": "Buy Airtime\n1. For Self\n2. For Other\n3. Back",
+        "options": {
+          "1": { "next": "airtimeSelf" },
+          "2": { "next": "airtimeOther" },
+          "3": { "next": "welcome" }
+        }
+      },
+      "airtimeSelf": {
+        "type": "input",
+        "text": "Enter amount for airtime:",
+        "validator": "validateAmount",
+        "store": "airtimeAmount",
+        "next": "confirmAirtimeSelf"
+      },
+      "airtimeOther": {
+        "type": "input",
+        "text": "Enter phone number:",
+        "validator": "validatePhone",
+        "store": "airtimePhone",
+        "next": "airtimeOtherAmount"
+      },
+      "airtimeOtherAmount": {
+        "type": "input",
+        "text": "Enter amount for {{airtimePhone}}:",
+        "validator": "validateAmount",
+        "store": "airtimeAmount",
+        "next": "confirmAirtimeOther"
+      },
+      "confirmAirtimeSelf": {
+        "type": "menu",
+        "text": "Confirm airtime purchase of ${{airtimeAmount}} for your number?\n1. Confirm\n2. Cancel",
+        "options": {
+          "1": { "next": "processAirtime", "store": { "airtimePhone": "self" } },
+          "2": { "next": "airtimeMenu" }
+        }
+      },
+      "confirmAirtimeOther": {
+        "type": "menu",
+        "text": "Confirm airtime purchase of ${{airtimeAmount}} for {{airtimePhone}}?\n1. Confirm\n2. Cancel",
+        "options": {
+          "1": { "next": "processAirtime" },
+          "2": { "next": "airtimeMenu" }
+        }
+      },
+      "processAirtime": {
+        "type": "dynamic",
+        "handler": "processAirtime",
+        "next": "airtimeSuccess"
+      },
+      "airtimeSuccess": {
+        "type": "notification",
+        "text": "Successfully purchased airtime worth ${{airtimeAmount}} for {{airtimePhone}}.\nReference: {{airtimeRef}}\nThank you for using our service.",
+        "shouldClose": true
+      },
+      "exit": {
+        "type": "notification",
+        "text": "Thank you for using Advanced Banking. Goodbye!",
+        "shouldClose": true
+      }
+    }
+  }
