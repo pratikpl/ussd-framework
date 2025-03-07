@@ -2,16 +2,27 @@
 const path = require('path');
 const fs = require('fs').promises;
 
-// Get framework root directory (assuming admin is in framework root)
-const frameworkRoot = path.resolve(__dirname, '../../');
+// Explicitly determine the project root - going up two levels from the current file
+// Current: admin/server/utils/frameworkConfig.js
+// Need to go up to: /
+const frameworkRoot = path.resolve(__dirname, '../../../');
 
-// Default paths
+console.log('Framework root directory:', frameworkRoot);
+
+// Explicitly set paths to ensure they're correct
 const defaultConfig = {
-  flowsPath: path.join(frameworkRoot, 'src/flows'),
-  helpersPath: path.join(frameworkRoot, 'src/helpers'),
+  flowsPath: path.join(frameworkRoot, 'src', 'flows'),
+  helpersPath: path.join(frameworkRoot, 'src', 'helpers'),
   logsPath: path.join(frameworkRoot, 'logs'),
   configPath: path.join(frameworkRoot, 'config')
 };
+
+// Log the default paths for debugging
+console.log('Default config paths:');
+console.log('- flowsPath:', defaultConfig.flowsPath);
+console.log('- helpersPath:', defaultConfig.helpersPath);
+console.log('- logsPath:', defaultConfig.logsPath);
+console.log('- configPath:', defaultConfig.configPath);
 
 /**
  * Loads the framework configuration
@@ -19,20 +30,40 @@ const defaultConfig = {
  */
 async function loadFrameworkConfig() {
   try {
+    // Create required directories if they don't exist
+    await ensureDirectories(defaultConfig);
+    
     // Try to load from the main config file
     const configFile = path.join(defaultConfig.configPath, 'index.js');
-    const config = require(configFile);
+    console.log('Trying to load config from:', configFile);
     
-    return {
+    let config = {};
+    try {
+      config = require(configFile);
+      console.log('Successfully loaded config from file');
+    } catch (error) {
+      console.warn('Could not load main config file:', error.message);
+      console.warn('Using default configuration paths');
+    }
+    
+    // Create a config that uses the correct paths
+    const finalConfig = {
       ...defaultConfig,
       ...config,
-      // Override with full paths if needed
-      flowsPath: config.flowsPath || defaultConfig.flowsPath,
-      helpersPath: config.helpersPath || defaultConfig.helpersPath,
-      logsPath: path.join(frameworkRoot, 'logs')
+      // Always use the absolute paths from default config to avoid path issues
+      flowsPath: defaultConfig.flowsPath,
+      helpersPath: defaultConfig.helpersPath,
+      logsPath: defaultConfig.logsPath
     };
+    
+    console.log('Final config paths:');
+    console.log('- flowsPath:', finalConfig.flowsPath);
+    console.log('- helpersPath:', finalConfig.helpersPath);
+    console.log('- logsPath:', finalConfig.logsPath);
+    
+    return finalConfig;
   } catch (error) {
-    console.warn('Could not load framework config, using defaults:', error.message);
+    console.warn('Error in loadFrameworkConfig:', error);
     return defaultConfig;
   }
 }
@@ -51,9 +82,13 @@ async function ensureDirectories(config) {
   for (const dir of directories) {
     try {
       await fs.mkdir(dir, { recursive: true });
+      console.log(`Created directory: ${dir}`);
     } catch (error) {
       if (error.code !== 'EEXIST') {
+        console.error(`Error creating directory ${dir}:`, error);
         throw error;
+      } else {
+        console.log(`Directory already exists: ${dir}`);
       }
     }
   }
